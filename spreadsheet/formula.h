@@ -1,8 +1,10 @@
 #pragma once
 
 #include "common.h"
+#include "FormulaAST.h"
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 // Формула, позволяющая вычислять и обновлять арифметическое выражение.
@@ -18,8 +20,6 @@ public:
 
     virtual ~FormulaInterface() = default;
 
-    // Обратите внимание, что в метод Evaluate() ссылка на таблицу передаётся 
-    // в качестве аргумента.
     // Возвращает вычисленное значение формулы для переданного листа либо ошибку.
     // Если вычисление какой-то из указанных в формуле ячеек приводит к ошибке, то
     // возвращается именно эта ошибка. Если таких ошибок несколько, возвращается
@@ -36,6 +36,21 @@ public:
     virtual std::vector<Position> GetReferencedCells() const = 0;
 };
 
+class Formula : public FormulaInterface {
+public:
+    explicit Formula(std::string expression);
+
+    Value Evaluate(const SheetInterface& sheet) const override;
+    std::string GetExpression() const override;
+    std::vector<Position> GetReferencedCells() const override;
+private:
+    FormulaAST ast_;
+};
+
 // Парсит переданное выражение и возвращает объект формулы.
 // Бросает FormulaException в случае, если формула синтаксически некорректна.
 std::unique_ptr<FormulaInterface> ParseFormula(std::string expression);
+
+std::ostream &operator<<(std::ostream &output, const FormulaInterface::Value &value);
+
+std::optional<double> IsStringDoubleNumeric(const std::string &str);

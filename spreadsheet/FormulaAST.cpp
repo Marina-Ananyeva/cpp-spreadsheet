@@ -1,10 +1,10 @@
 #include "FormulaAST.h"
 
 #include "FormulaBaseListener.h"
-#include "FormulaLexer.h"
 #include "FormulaParser.h"
 
 #include <cassert>
+#include <cfloat>
 #include <cmath>
 #include <memory>
 #include <optional>
@@ -67,12 +67,13 @@ constexpr PrecedenceRule PRECEDENCE_RULES[EP_END][EP_END] = {
     /* EP_ATOM */ {PR_NONE, PR_NONE, PR_NONE, PR_NONE, PR_NONE, PR_NONE},
 };
 
+//------------------------------Expr------------------------------------------------
 class Expr {
 public:
     virtual ~Expr() = default;
     virtual void Print(std::ostream& out) const = 0;
     virtual void DoPrintFormula(std::ostream& out, ExprPrecedence precedence) const = 0;
-    virtual double Evaluate(/*добавьте сюда нужные аргументы*/ args) const = 0;
+    virtual double Evaluate(const CellLookup& cell_lookup) const = 0;
 
     // higher is tighter
     virtual ExprPrecedence GetPrecedence() const = 0;
@@ -93,6 +94,8 @@ public:
         }
     }
 };
+
+//-------------------------------BinaryOpExpr--------------------------------
 
 namespace {
 class BinaryOpExpr final : public Expr {
@@ -142,8 +145,31 @@ public:
         }
     }
 
-    double Evaluate(/*добавьте нужные аргументы*/) const override {
-			// Скопируйте ваше решение из предыдущих уроков.
+    // При делении на 0 выбрасывается ошибка вычисления FormulaError
+    double Evaluate(const CellLookup& cell_lookup) const override {
+        double dividend = 0.0;
+        double divisor = 0.0;
+        switch (type_) {
+            case Add:
+                return lhs_->Evaluate(cell_lookup) + rhs_->Evaluate(cell_lookup);
+            case Subtract:
+                return lhs_->Evaluate(cell_lookup) - rhs_->Evaluate(cell_lookup);
+            case Multiply:
+                return lhs_->Evaluate(cell_lookup) * rhs_->Evaluate(cell_lookup);
+            case Divide:
+                dividend = lhs_->Evaluate(cell_lookup);
+                divisor = rhs_->Evaluate(cell_lookup);
+                if (std::isfinite(dividend / divisor)) {
+                    return dividend / divisor;
+                }
+                else {
+                    throw FormulaError(FormulaError::Category::Div0);
+                }
+            default:
+                // have to do this because VC++ has a buggy warning
+                assert(false);
+                return DBL_MAX;
+        }
     }
 
 private:
@@ -180,8 +206,17 @@ public:
         return EP_UNARY;
     }
 
-    double Evaluate(/*добавьте нужные аргументы*/ args) const override {
-        // Скопируйте ваше решение из предыдущих уроков.
+    double Evaluate(const CellLookup& cell_lookup) const override {
+        switch (type_) {
+            case UnaryPlus:
+                return operand_->Evaluate(cell_lookup);
+            case UnaryMinus:
+                return -(operand_->Evaluate(cell_lookup));
+            default:
+                // have to do this because VC++ has a buggy warning
+                assert(false);
+                return DBL_MAX;
+        }  
     }
 
 private:
@@ -211,8 +246,8 @@ public:
         return EP_ATOM;
     }
 
-    double Evaluate(/*добавьте нужные аргументы*/ args) const override {
-        // реализуйте метод.
+    double Evaluate(const CellLookup& cell_lookup) const override {
+        return cell_lookup(*cell_);
     }
 
 private:
@@ -237,7 +272,7 @@ public:
         return EP_ATOM;
     }
 
-    double Evaluate(/*добавьте нужные аргументы*/ args) const override {
+    double Evaluate(const CellLookup& cell_lookup) const override {
         return value_;
     }
 
@@ -374,7 +409,11 @@ FormulaAST ParseFormulaAST(std::istream& in) {
 
 FormulaAST ParseFormulaAST(const std::string& in_str) {
     std::istringstream in(in_str);
-    return ParseFormulaAST(in);
+    try {
+        return ParseFormulaAST(in);
+    } catch (const std::exception& exc) {
+        std::throw_with_nested(FormulaException(exc.what()));
+    }
 }
 
 void FormulaAST::PrintCells(std::ostream& out) const {
@@ -391,8 +430,8 @@ void FormulaAST::PrintFormula(std::ostream& out) const {
     root_expr_->PrintFormula(out, ASTImpl::EP_ATOM);
 }
 
-double FormulaAST::Execute(/*добавьте нужные аргументы*/ args) const {
-    return root_expr_->Evaluate(/*добавьте нужные аргументы*/ args);
+double FormulaAST::Execute(const CellLookup& cell_lookup) const {
+    return root_expr_->Evaluate(cell_lookup);
 }
 
 FormulaAST::FormulaAST(std::unique_ptr<ASTImpl::Expr> root_expr, std::forward_list<Position> cells)
@@ -402,3 +441,11 @@ FormulaAST::FormulaAST(std::unique_ptr<ASTImpl::Expr> root_expr, std::forward_li
 }
 
 FormulaAST::~FormulaAST() = default;
+
+std::forward_list<Position> FormulaAST::GetReferencedCells() {
+    return cells_;
+}
+
+const std::forward_list<Position> FormulaAST::GetReferencedCells() const {
+    return cells_;
+}

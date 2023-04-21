@@ -33,6 +33,8 @@ struct Size {
     bool operator==(Size rhs) const;
 };
 
+std::ostream &operator<<(std::ostream &output, Position pos);
+
 // Описывает ошибки, которые могут возникнуть при вычислении формулы.
 class FormulaError {
 public:
@@ -48,7 +50,7 @@ public:
 
     bool operator==(FormulaError rhs) const;
 
-    std::string_view ToString() const;
+    std::string ToString() const;
 
 private:
     Category category_;
@@ -146,4 +148,4 @@ public:
 };
 
 // Создаёт готовую к работе пустую таблицу.
-std::unique_ptr<SheetInterface> CreateSheet();
+std::unique_ptr<SheetInterface> CreateSheet(); 
