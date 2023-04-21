@@ -52,10 +52,10 @@ void TestSetCellPlainText() {
     };
 
     checkCell("A1"_pos, "Hello");
-    //checkCell("A1"_pos, "World");
-    //checkCell("B2"_pos, "Purr");
-    //checkCell("A3"_pos, "Meow");
-    /*
+    checkCell("A1"_pos, "World");
+    checkCell("B2"_pos, "Purr");
+    checkCell("A3"_pos, "Meow");
+   
     const SheetInterface& constSheet = *sheet;
     ASSERT_EQUAL(constSheet.GetCell("B2"_pos)->GetText(), "Purr");
 
@@ -63,7 +63,6 @@ void TestSetCellPlainText() {
     CellInterface* cell = sheet->GetCell("A3"_pos);
     ASSERT_EQUAL(cell->GetText(), "'=escaped");
     ASSERT_EQUAL(std::get<std::string>(cell->GetValue()), "=escaped");
-    */
 }
 
 void TestClearCell() {

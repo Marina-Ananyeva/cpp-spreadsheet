@@ -16,8 +16,8 @@ public:
     void SetReferencedAndDependentCells(Position pos);
     void SetCell(Position pos, std::string text) override;
 
-    const CellInterface* GetCell(Position pos) const override;
-    CellInterface* GetCell(Position pos) override;
+    const Cell* GetCell(Position pos) const override;
+    Cell* GetCell(Position pos) override;
 
     void ClearCell(Position pos) override;
 

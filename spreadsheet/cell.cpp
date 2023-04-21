@@ -225,7 +225,7 @@ std::set<Position> Cell::GetDependentCells() const {
 }
 
 const Cell* Cell::GetCell(Position pos) const {
-    return dynamic_cast<const Cell*>(sheet_.GetCell(pos));
+    return sheet_.GetCell(pos);
 }
 
 bool Cell::GetValidity() const {

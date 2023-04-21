@@ -17,13 +17,13 @@ void Sheet::CheckSheetSize(Position pos) {
 }
 
 void Sheet::InvalidateDependentCells(Position pos) {
-    const Cell *cell_ptr = dynamic_cast<const Cell *>(GetCell(pos));
+    const Cell *cell_ptr = GetCell(pos);
     if (cell_ptr) {
         for (Position cell_pos : cell_ptr->GetDependentCells()) {
-            const Cell *ptr_cell = dynamic_cast<const Cell*>(GetCell(cell_pos));
+            const Cell *ptr_cell = GetCell(cell_pos);
             if (ptr_cell == nullptr) {
                 SetCell(cell_pos, "");
-                ptr_cell = dynamic_cast<Cell *>(GetCell(cell_pos));
+                ptr_cell = GetCell(cell_pos);
             }
             ptr_cell->SetValidateFlag(false);
         }
@@ -31,14 +31,14 @@ void Sheet::InvalidateDependentCells(Position pos) {
 }
 
 void Sheet::SetReferencedAndDependentCells(Position pos) {
-    const Cell *cell_ptr = dynamic_cast<const Cell *>(GetCell(pos));
+    const Cell *cell_ptr = GetCell(pos);
     if (cell_ptr) {
         for (Position cell_pos : cell_ptr->GetReferencedCells()) {
             cell_ptr->SetCellTo(cell_pos);
-            const Cell *ptr_cell = dynamic_cast<const Cell*>(GetCell(cell_pos));
+            const Cell *ptr_cell = GetCell(cell_pos);
             if (ptr_cell == nullptr) {
                 SetCell(cell_pos, "");
-                ptr_cell = dynamic_cast<Cell *>(GetCell(cell_pos));
+                ptr_cell = GetCell(cell_pos);
             }
             ptr_cell->SetCellFrom(pos);
         }
@@ -93,7 +93,7 @@ void Sheet::SetCell(Position pos, std::string text) {
     InvalidateDependentCells(pos);
 }
 
-const CellInterface* Sheet::GetCell(Position pos) const {
+const Cell* Sheet::GetCell(Position pos) const {
     if (pos.IsValid()) {
         if (IsSheetIncludesPos(pos)) {
             if (sheet_.at(pos)->IsEmptyCell()) {
@@ -109,7 +109,7 @@ const CellInterface* Sheet::GetCell(Position pos) const {
     }
 }
 
-CellInterface* Sheet::GetCell(Position pos) {
+Cell* Sheet::GetCell(Position pos) {
     if (pos.IsValid()) {
         if (IsSheetIncludesPos(pos)) {
             if (sheet_[pos]->IsEmptyCell()) {
