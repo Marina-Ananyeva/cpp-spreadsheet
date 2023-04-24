@@ -91,7 +91,7 @@ public:
     bool GetValidity() const;
 
 private:
-    std::unique_ptr<Impl> impl_;
+    std::unique_ptr<Impl> impl_ = std::make_unique<EmptyImpl>();
     const Sheet& sheet_;
     mutable Cash cash_;
 };
