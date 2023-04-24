@@ -147,20 +147,39 @@ public:
 
     // При делении на 0 выбрасывается ошибка вычисления FormulaError
     double Evaluate(const CellLookup& cell_lookup) const override {
-        double dividend = 0.0;
-        double divisor = 0.0;
+        double result = 0.0;
+        double left_operand = 0.0;
+        double right_operand = 0.0;
         switch (type_) {
             case Add:
-                return lhs_->Evaluate(cell_lookup) + rhs_->Evaluate(cell_lookup);
+                left_operand = lhs_->Evaluate(cell_lookup);
+                right_operand = rhs_->Evaluate(cell_lookup);
+                result = left_operand + right_operand;
+                if (std::isinf(result) || std::isnan(result)) {
+                    throw FormulaError{FormulaError::Category::Div0};
+                }
+                return result;
             case Subtract:
-                return lhs_->Evaluate(cell_lookup) - rhs_->Evaluate(cell_lookup);
+                left_operand = lhs_->Evaluate(cell_lookup);
+                right_operand = rhs_->Evaluate(cell_lookup);
+                result = left_operand - right_operand;
+                if (std::isinf(result) || std::isnan(result)) {
+                    throw FormulaError{FormulaError::Category::Div0};
+                }
+                return result;
             case Multiply:
-                return lhs_->Evaluate(cell_lookup) * rhs_->Evaluate(cell_lookup);
+                left_operand = lhs_->Evaluate(cell_lookup);
+                right_operand = rhs_->Evaluate(cell_lookup);
+                result = left_operand * right_operand;
+                if (std::isinf(result) || std::isnan(result)) {
+                    throw FormulaError{FormulaError::Category::Div0};
+                }
+                return result;
             case Divide:
-                dividend = lhs_->Evaluate(cell_lookup);
-                divisor = rhs_->Evaluate(cell_lookup);
-                if (std::isfinite(dividend / divisor)) {
-                    return dividend / divisor;
+                left_operand = lhs_->Evaluate(cell_lookup);
+                right_operand = rhs_->Evaluate(cell_lookup);
+                if (std::isfinite(left_operand / right_operand)) {
+                    return left_operand / right_operand;
                 }
                 else {
                     throw FormulaError(FormulaError::Category::Div0);
