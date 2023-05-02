@@ -13,14 +13,15 @@
 
 Запустить проект:
 1. Добавить соответствующие команды в файл main.cpp по приведенному образцу. 
-2. Собрать проект с использовавнием CMake - сформируется файл spreadsheet.exe.
-3. Запустить файл spreadsheet.exe с вашим main.cpp (образцы main.cpp и spreadsheet.exe уже размещены в проекте).
+2. Собрать проект с использовавнием CMake - сформируется файл spreadsheet.exe. Используйте подготовенные для этого и размещенные в проекте CMakeLists.txt и FindANTLR.cmake.
+3. Запустить файл spreadsheet.exe с вашим main.cpp.
 
 # Системные требования:
 1. С++17
 2. GCC(MinGW-w64) 11.2.0
-3. Библиотека ANTLR4 https://www.antlr.org/
-4. CMake version 3.8+ https://cmake.org
+3. Комплект разработки для Java JDK https://www.oracle.com/java/technologies/downloads/
+4. Библиотека ANTLR4 https://www.antlr.org/
+5. CMake version 3.8+ https://cmake.org
 
 # Планы по доработке:
-1. Добавить интерфейс для работы пользователя с таблицей из консоли.
+1. Добавить пользовательский интерфейс для работы с таблицей с консоли.
